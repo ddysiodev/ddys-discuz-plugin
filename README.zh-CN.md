@@ -19,6 +19,7 @@
 - 通过 `plugin.php?id=ddys_open:index` 提供独立展示页。
 - 通过 `plugin.php?id=ddys_open:api` 提供本地 JSON 代理。
 - 通过 `plugin.php?id=ddys_open:request` 提供服务端求片提交。
+- 可选启用前台伪静态链接，并提供 Apache、Nginx、IIS rewrite 规则。
 - 独立数据库缓存表和限流表。
 - 图标复制自主站图标集。
 
@@ -68,6 +69,72 @@ plugin.php?id=ddys_open:index&view=collections
 plugin.php?id=ddys_open:index&view=requests
 ```
 
+启用插件变量“启用伪静态链接”后，默认会输出下面这些前台地址：
+
+```text
+/ddys/
+/ddys/hot
+/ddys/search
+/ddys/calendar
+/ddys/movie/this-tempting-madness
+/ddys/collections
+/ddys/requests
+```
+
+求片表单提交地址会变成：
+
+```text
+/ddys/request-submit
+```
+
+如果把“伪静态基础路径”从 `ddys` 改成别的值，下面规则里的 `ddys` 也要同步替换。Discuz 安装在子目录时，把规则放到对应站点或子目录的 rewrite 配置里。
+
+### Apache
+
+把规则放到 Discuz 根目录 `.htaccess`，并确认 `mod_rewrite` 已启用：
+
+```apache
+RewriteEngine On
+RewriteRule ^ddys/?$ plugin.php?id=ddys_open:index [L,QSA]
+RewriteRule ^ddys/(hot|search|calendar|collections|requests)/?$ plugin.php?id=ddys_open:index&view=$1 [L,QSA]
+RewriteRule ^ddys/movie/([^/]+)/?$ plugin.php?id=ddys_open:index&view=movie&slug=$1 [L,QSA]
+RewriteRule ^ddys/request-submit/?$ plugin.php?id=ddys_open:request [L,QSA]
+```
+
+### Nginx
+
+把规则放到 Discuz 站点的 `server` 块里，位置要早于通用 PHP 入口规则：
+
+```nginx
+rewrite ^/ddys/?$ /plugin.php?id=ddys_open:index last;
+rewrite ^/ddys/(hot|search|calendar|collections|requests)/?$ /plugin.php?id=ddys_open:index&view=$1 last;
+rewrite ^/ddys/movie/([^/]+)/?$ /plugin.php?id=ddys_open:index&view=movie&slug=$1 last;
+rewrite ^/ddys/request-submit/?$ /plugin.php?id=ddys_open:request last;
+```
+
+### IIS
+
+把规则加入 Discuz 根目录 `web.config` 的 `<rewrite><rules>` 中：
+
+```xml
+<rule name="DDYS Discuz Latest" stopProcessing="true">
+  <match url="^ddys/?$" />
+  <action type="Rewrite" url="plugin.php?id=ddys_open:index" appendQueryString="true" />
+</rule>
+<rule name="DDYS Discuz Views" stopProcessing="true">
+  <match url="^ddys/(hot|search|calendar|collections|requests)/?$" />
+  <action type="Rewrite" url="plugin.php?id=ddys_open:index&amp;view={R:1}" appendQueryString="true" />
+</rule>
+<rule name="DDYS Discuz Movie" stopProcessing="true">
+  <match url="^ddys/movie/([^/]+)/?$" />
+  <action type="Rewrite" url="plugin.php?id=ddys_open:index&amp;view=movie&amp;slug={R:1}" appendQueryString="true" />
+</rule>
+<rule name="DDYS Discuz Request Submit" stopProcessing="true">
+  <match url="^ddys/request-submit/?$" />
+  <action type="Rewrite" url="plugin.php?id=ddys_open:request" appendQueryString="true" />
+</rule>
+```
+
 ## 本地检查
 
 ```bash
@@ -76,4 +143,3 @@ node --test tests/*.test.mjs
 ```
 
 检查会覆盖插件目录结构、XML 字段、短代码覆盖、数据表安装脚本、前台资源、图标尺寸，以及是否误带敏感文本或临时文件。
-

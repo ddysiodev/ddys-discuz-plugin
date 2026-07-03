@@ -19,6 +19,7 @@ Official Discuz! X plugin for the [DDYS](https://ddys.io/) API.
 - Standalone plugin pages through `plugin.php?id=ddys_open:index`.
 - Local JSON proxy through `plugin.php?id=ddys_open:api`.
 - Server-side request form through `plugin.php?id=ddys_open:request`.
+- Optional pretty frontend URLs with Apache, Nginx, and IIS rewrite rules.
 - Database cache table and rate-limit table.
 - DDYS icons copied from the main site icon set.
 
@@ -68,6 +69,72 @@ plugin.php?id=ddys_open:index&view=collections
 plugin.php?id=ddys_open:index&view=requests
 ```
 
+After enabling the plugin variable `Enable Pretty URLs`, the frontend links default to:
+
+```text
+/ddys/
+/ddys/hot
+/ddys/search
+/ddys/calendar
+/ddys/movie/this-tempting-madness
+/ddys/collections
+/ddys/requests
+```
+
+The request form posts to:
+
+```text
+/ddys/request-submit
+```
+
+If you change the pretty URL base path from `ddys`, replace `ddys` in the rules below with your chosen path. If Discuz is installed in a subdirectory, place the rules in that site or subdirectory rewrite configuration.
+
+### Apache
+
+Add the rules to the Discuz root `.htaccess` and make sure `mod_rewrite` is enabled:
+
+```apache
+RewriteEngine On
+RewriteRule ^ddys/?$ plugin.php?id=ddys_open:index [L,QSA]
+RewriteRule ^ddys/(hot|search|calendar|collections|requests)/?$ plugin.php?id=ddys_open:index&view=$1 [L,QSA]
+RewriteRule ^ddys/movie/([^/]+)/?$ plugin.php?id=ddys_open:index&view=movie&slug=$1 [L,QSA]
+RewriteRule ^ddys/request-submit/?$ plugin.php?id=ddys_open:request [L,QSA]
+```
+
+### Nginx
+
+Place the rules in the Discuz site `server` block before the generic PHP entry rules:
+
+```nginx
+rewrite ^/ddys/?$ /plugin.php?id=ddys_open:index last;
+rewrite ^/ddys/(hot|search|calendar|collections|requests)/?$ /plugin.php?id=ddys_open:index&view=$1 last;
+rewrite ^/ddys/movie/([^/]+)/?$ /plugin.php?id=ddys_open:index&view=movie&slug=$1 last;
+rewrite ^/ddys/request-submit/?$ /plugin.php?id=ddys_open:request last;
+```
+
+### IIS
+
+Add the rules under `<rewrite><rules>` in the Discuz root `web.config`:
+
+```xml
+<rule name="DDYS Discuz Latest" stopProcessing="true">
+  <match url="^ddys/?$" />
+  <action type="Rewrite" url="plugin.php?id=ddys_open:index" appendQueryString="true" />
+</rule>
+<rule name="DDYS Discuz Views" stopProcessing="true">
+  <match url="^ddys/(hot|search|calendar|collections|requests)/?$" />
+  <action type="Rewrite" url="plugin.php?id=ddys_open:index&amp;view={R:1}" appendQueryString="true" />
+</rule>
+<rule name="DDYS Discuz Movie" stopProcessing="true">
+  <match url="^ddys/movie/([^/]+)/?$" />
+  <action type="Rewrite" url="plugin.php?id=ddys_open:index&amp;view=movie&amp;slug={R:1}" appendQueryString="true" />
+</rule>
+<rule name="DDYS Discuz Request Submit" stopProcessing="true">
+  <match url="^ddys/request-submit/?$" />
+  <action type="Rewrite" url="plugin.php?id=ddys_open:request" appendQueryString="true" />
+</rule>
+```
+
 ## Local Checks
 
 ```bash
@@ -76,4 +143,3 @@ node --test tests/*.test.mjs
 ```
 
 The checks verify plugin structure, XML fields, shortcode coverage, table setup, frontend assets, icon sizes, and accidental sensitive or temporary files.
-

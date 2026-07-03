@@ -11,7 +11,7 @@
       <item id="datatables"><![CDATA[ddys_open_cache,ddys_open_rate]]></item>
       <item id="directory"><![CDATA[ddys_open/]]></item>
       <item id="copyright"><![CDATA[DDYS]]></item>
-      <item id="version"><![CDATA[0.1.0]]></item>
+      <item id="version"><![CDATA[0.1.1]]></item>
       <item id="__modules">
         <item id="0">
           <item id="name"><![CDATA[index]]></item>
@@ -131,7 +131,10 @@ _self=当前窗口]]></item></item>
       <item id="19"><item id="displayorder"><![CDATA[20]]></item><item id="title"><![CDATA[论坛首页组件]]></item><item id="description"><![CDATA[填短代码；留空则不输出。]]></item><item id="variable"><![CDATA[index_widget_shortcode]]></item><item id="type"><![CDATA[text]]></item><item id="value"><![CDATA[[ddys_latest limit="8"]]]></item><item id="extra"><![CDATA[]]></item></item>
       <item id="20"><item id="displayorder"><![CDATA[21]]></item><item id="title"><![CDATA[版块页组件]]></item><item id="description"><![CDATA[填短代码；留空则不输出。]]></item><item id="variable"><![CDATA[forumdisplay_widget_shortcode]]></item><item id="type"><![CDATA[text]]></item><item id="value"><![CDATA[]]></item><item id="extra"><![CDATA[]]></item></item>
       <item id="21"><item id="displayorder"><![CDATA[22]]></item><item id="title"><![CDATA[主题页组件]]></item><item id="description"><![CDATA[填短代码；留空则不输出。]]></item><item id="variable"><![CDATA[viewthread_widget_shortcode]]></item><item id="type"><![CDATA[text]]></item><item id="value"><![CDATA[]]></item><item id="extra"><![CDATA[]]></item></item>
-      <item id="22"><item id="displayorder"><![CDATA[23]]></item><item id="title"><![CDATA[调试]]></item><item id="description"><![CDATA[保留字段，默认关闭。]]></item><item id="variable"><![CDATA[debug]]></item><item id="type"><![CDATA[radio]]></item><item id="value"><![CDATA[0]]></item><item id="extra"><![CDATA[1=是
+      <item id="22"><item id="displayorder"><![CDATA[23]]></item><item id="title"><![CDATA[启用伪静态链接]]></item><item id="description"><![CDATA[启用前请先配置 README 里的服务器 rewrite 规则。]]></item><item id="variable"><![CDATA[enable_pretty_urls]]></item><item id="type"><![CDATA[radio]]></item><item id="value"><![CDATA[0]]></item><item id="extra"><![CDATA[1=是
+0=否]]></item></item>
+      <item id="23"><item id="displayorder"><![CDATA[24]]></item><item id="title"><![CDATA[伪静态基础路径]]></item><item id="description"><![CDATA[默认 ddys，对应 /ddys/。只允许字母、数字、下划线、中划线和斜杠。]]></item><item id="variable"><![CDATA[pretty_base_path]]></item><item id="type"><![CDATA[text]]></item><item id="value"><![CDATA[ddys]]></item><item id="extra"><![CDATA[]]></item></item>
+      <item id="24"><item id="displayorder"><![CDATA[25]]></item><item id="title"><![CDATA[调试]]></item><item id="description"><![CDATA[保留字段，默认关闭。]]></item><item id="variable"><![CDATA[debug]]></item><item id="type"><![CDATA[radio]]></item><item id="value"><![CDATA[0]]></item><item id="extra"><![CDATA[1=是
 0=否]]></item></item>
     </item>
   </item>

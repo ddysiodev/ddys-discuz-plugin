@@ -23,6 +23,8 @@ test('plugin XML declares modules, variables, and lifecycle scripts', async () =
   assert.match(xml, /<item id="__variables">/);
   assert.match(xml, /api_base_url/);
   assert.match(xml, /enable_request_form/);
+  assert.match(xml, /enable_pretty_urls/);
+  assert.match(xml, /pretty_base_path/);
 });
 
 test('forum hooks parse post shortcodes and expose page widgets', async () => {
@@ -37,6 +39,7 @@ test('forum hooks parse post shortcodes and expose page widgets', async () => {
 
 test('all planned shortcodes are implemented', async () => {
   const shortcode = await read('ddys_open/source/shortcode.func.php');
+  const admin = await read('ddys_open/admincp.inc.php');
   for (const name of [
     'ddys_movies',
     'ddys_latest',
@@ -61,6 +64,7 @@ test('all planned shortcodes are implemented', async () => {
     'ddys_request_form'
   ]) {
     assert.ok(shortcode.includes(`'${name}'`), name);
+    assert.ok(admin.includes(`value="${name}"`) || admin.includes(`[${name}`), `admin generator missing ${name}`);
   }
 });
 
@@ -88,6 +92,12 @@ test('readmes use language-specific official website links', async () => {
   const zh = await read('README.zh-CN.md');
   assert.match(en, /\[DDYS\]\(https:\/\/ddys\.io\/\) API/);
   assert.match(zh, /\[低端影视\]\(https:\/\/ddys\.io\/\) API/);
+  for (const text of [en, zh]) {
+    assert.match(text, /\/ddys\/movie\/this-tempting-madness/);
+    assert.match(text, /RewriteRule \^ddys\/\?\$/);
+    assert.match(text, /rewrite \^\/ddys\/\?\$/);
+    assert.match(text, /DDYS Discuz Movie/);
+  }
 });
 
 test('icons use copied DDYS sizes', async () => {

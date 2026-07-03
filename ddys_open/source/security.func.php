@@ -5,7 +5,7 @@ if (!defined('IN_DISCUZ')) {
 }
 
 define('DDYS_OPEN_ID', 'ddys_open');
-define('DDYS_OPEN_VERSION', '0.1.0');
+define('DDYS_OPEN_VERSION', '0.1.1');
 define('DDYS_OPEN_API_DEFAULT', 'https://ddys.io/api/v1');
 define('DDYS_OPEN_SITE_DEFAULT', 'https://ddys.io');
 
@@ -31,6 +31,8 @@ function ddys_open_defaults()
         'enable_request_form' => 0,
         'request_interval' => 60,
         'show_nav' => 1,
+        'enable_pretty_urls' => 0,
+        'pretty_base_path' => 'ddys',
         'index_widget_shortcode' => '[ddys_latest limit="8"]',
         'forumdisplay_widget_shortcode' => '',
         'viewthread_widget_shortcode' => '',
@@ -65,9 +67,10 @@ function ddys_open_settings()
     $settings['theme'] = ddys_open_choice($settings['theme'], array('auto', 'light', 'dark'), 'auto');
     $settings['layout'] = ddys_open_choice($settings['layout'], array('grid', 'list', 'compact'), 'grid');
     $settings['target'] = ddys_open_choice($settings['target'], array('_blank', '_self'), '_blank');
-    foreach (array('show_source_link', 'enable_styles', 'enable_request_form', 'show_nav', 'debug') as $key) {
+    foreach (array('show_source_link', 'enable_styles', 'enable_request_form', 'show_nav', 'enable_pretty_urls', 'debug') as $key) {
         $settings[$key] = ddys_open_bool($settings[$key]) ? 1 : 0;
     }
+    $settings['pretty_base_path'] = ddys_open_normalize_base_path($settings['pretty_base_path'], 'ddys');
     $settings['api_key'] = trim((string)$settings['api_key']);
     return $settings;
 }
@@ -159,6 +162,76 @@ function ddys_open_safe_media_url($value)
         return '';
     }
     return $value;
+}
+
+function ddys_open_normalize_base_path($value, $fallback)
+{
+    $value = trim((string)$value);
+    $value = trim($value, "/ \t\r\n");
+    if ($value === '' || !preg_match('#^[a-zA-Z0-9_\-/]+$#', $value) || strpos($value, '..') !== false) {
+        return $fallback;
+    }
+    return $value;
+}
+
+function ddys_open_site_url_base()
+{
+    global $_G;
+    return isset($_G['siteurl']) ? rtrim($_G['siteurl'], '/') . '/' : '';
+}
+
+function ddys_open_endpoint_url($endpoint)
+{
+    $settings = ddys_open_settings();
+    if (!empty($settings['enable_pretty_urls'])) {
+        $base = ddys_open_site_url_base() . $settings['pretty_base_path'];
+        if ($endpoint === 'request') {
+            return $base . '/request-submit';
+        }
+    }
+    return 'plugin.php?id=ddys_open:' . $endpoint;
+}
+
+function ddys_open_page_url($view = 'latest', $params = array())
+{
+    $settings = ddys_open_settings();
+    $view = ddys_open_choice($view, array('latest', 'hot', 'search', 'calendar', 'movie', 'collections', 'requests'), 'latest');
+    if (!empty($settings['enable_pretty_urls'])) {
+        $base = ddys_open_site_url_base() . $settings['pretty_base_path'];
+        if ($view === 'latest') {
+            $url = $base . '/';
+        } elseif ($view === 'movie') {
+            $slug = isset($params['slug']) ? rawurlencode(ddys_open_request_scalar($params['slug'])) : '';
+            $url = $slug !== '' ? $base . '/movie/' . $slug : $base . '/';
+            unset($params['slug']);
+        } else {
+            $url = $base . '/' . rawurlencode($view);
+        }
+        return ddys_open_append_query($url, $params);
+    }
+    $query = array_merge($view === 'latest' ? array() : array('view' => $view), $params);
+    return ddys_open_append_query('plugin.php?id=ddys_open:index', $query);
+}
+
+function ddys_open_append_query($url, $params)
+{
+    $query = ddys_open_clean_query($params);
+    if (empty($query)) {
+        return $url;
+    }
+    return $url . (strpos($url, '?') === false ? '?' : '&') . http_build_query($query, '', '&');
+}
+
+function ddys_open_clean_query($params)
+{
+    $out = array();
+    foreach ($params as $key => $value) {
+        $value = ddys_open_request_scalar($value);
+        if ($value !== '') {
+            $out[$key] = $value;
+        }
+    }
+    return $out;
 }
 
 function ddys_open_plugin_url()

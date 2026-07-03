@@ -27,6 +27,11 @@ $titles = array(
 );
 $title = isset($titles[$view]) ? $titles[$view] : '低端影视';
 $content = ddys_open_render_page($view, $params);
+$navLatest = ddys_open_page_url('latest');
+$navHot = ddys_open_page_url('hot');
+$navSearch = ddys_open_page_url('search');
+$navCalendar = ddys_open_page_url('calendar');
+$navCollections = ddys_open_page_url('collections');
+$navRequests = ddys_open_page_url('requests');
 
 include template('ddys_open:page');
-

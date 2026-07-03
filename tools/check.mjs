@@ -93,7 +93,9 @@ async function checkXml() {
     '<item id="__variables">',
     '<item id="variable"><![CDATA[api_base_url]]></item>',
     '<item id="variable"><![CDATA[api_key]]></item>',
-    '<item id="variable"><![CDATA[enable_request_form]]></item>'
+    '<item id="variable"><![CDATA[enable_request_form]]></item>',
+    '<item id="variable"><![CDATA[enable_pretty_urls]]></item>',
+    '<item id="variable"><![CDATA[pretty_base_path]]></item>'
   ]) {
     if (!xml.includes(text)) failures.push(`plugin XML missing ${text}`);
   }
@@ -104,6 +106,7 @@ async function checkPhp() {
   const client = await read('ddys_open/source/client.func.php');
   const render = await read('ddys_open/source/render.func.php');
   const shortcode = await read('ddys_open/source/shortcode.func.php');
+  const admin = await read('ddys_open/admincp.inc.php');
   const install = await read('ddys_open/install.php');
   for (const text of ['class plugin_ddys_open', 'discuzcode', 'global_header', 'plugin_ddys_open_forum']) {
     if (!klass.includes(text)) failures.push(`ddys_open.class.php missing ${text}`);
@@ -116,6 +119,7 @@ async function checkPhp() {
   }
   for (const shortcodeName of shortcodes) {
     if (!shortcode.includes(`'${shortcodeName}'`)) failures.push(`Missing shortcode ${shortcodeName}`);
+    if (!admin.includes(`value="${shortcodeName}"`) && !admin.includes(`[${shortcodeName}`)) failures.push(`Admin generator missing ${shortcodeName}`);
   }
   for (const text of ['ddys_open_cache', 'ddys_open_rate', '$finish = true']) {
     if (!install.includes(text)) failures.push(`install.php missing ${text}`);
@@ -132,6 +136,9 @@ async function checkDocs() {
   if (!en.includes('[DDYS](https://ddys.io/) API')) failures.push('English README must link DDYS website with DDYS text.');
   if (!zh.includes('[低端影视](https://ddys.io/) API')) failures.push('Chinese README must link official website with 低端影视 text.');
   for (const text of [en, zh]) {
+    for (const marker of ['/ddys/movie/this-tempting-madness', 'RewriteRule ^ddys/?$', 'rewrite ^/ddys/?$', 'DDYS Discuz Movie']) {
+      if (!text.includes(marker)) failures.push(`README missing pretty URL marker ${marker}`);
+    }
     for (const shortcodeName of ['ddys_latest', 'ddys_movie', 'ddys_request_form']) {
       if (!text.includes(shortcodeName)) failures.push(`README missing ${shortcodeName}`);
     }

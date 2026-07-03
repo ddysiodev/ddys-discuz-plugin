@@ -19,7 +19,7 @@ class plugin_ddys_open
         if (empty($settings['show_nav'])) {
             return '';
         }
-        return '<li><a href="plugin.php?id=ddys_open:index">低端影视</a></li>';
+        return '<li><a href="' . ddys_open_attr(ddys_open_page_url('latest')) . '">低端影视</a></li>';
     }
 
     public function discuzcode($param = array())

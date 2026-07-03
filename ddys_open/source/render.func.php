@@ -263,9 +263,12 @@ function ddys_open_render_search($args = array())
 {
     $q = ddys_open_get('ddys_q', isset($args['q']) ? $args['q'] : '');
     $type = ddys_open_get('ddys_type', isset($args['type']) ? $args['type'] : 'movie');
-    $html = '<form class="ddys-discuz-search" method="get" action="plugin.php">';
-    $html .= '<input type="hidden" name="id" value="ddys_open:index" />';
-    $html .= '<input type="hidden" name="view" value="search" />';
+    $settings = ddys_open_settings();
+    $html = '<form class="ddys-discuz-search" method="get" action="' . ddys_open_attr(!empty($settings['enable_pretty_urls']) ? ddys_open_page_url('search') : 'plugin.php') . '">';
+    if (empty($settings['enable_pretty_urls'])) {
+        $html .= '<input type="hidden" name="id" value="ddys_open:index" />';
+        $html .= '<input type="hidden" name="view" value="search" />';
+    }
     $html .= '<input type="search" name="ddys_q" value="' . ddys_open_attr($q) . '" placeholder="搜索低端影视" />';
     $html .= '<select name="ddys_type"><option value="movie"' . ($type === 'movie' ? ' selected' : '') . '>影片</option><option value="share"' . ($type === 'share' ? ' selected' : '') . '>分享</option><option value="request"' . ($type === 'request' ? ' selected' : '') . '>求片</option></select>';
     $html .= '<button type="submit">搜索</button></form>';
@@ -282,7 +285,7 @@ function ddys_open_render_request_form($args = array())
     if (empty($settings['enable_request_form'])) {
         return ddys_open_render_empty('求片表单未启用。', $args);
     }
-    $action = 'plugin.php?id=ddys_open:request';
+    $action = ddys_open_endpoint_url('request');
     $html = '<form class="ddys-discuz-request-form" method="post" action="' . ddys_open_attr($action) . '" data-ddys-discuz-request-form>';
     $html .= '<input type="hidden" name="formhash" value="' . ddys_open_attr(ddys_open_formhash()) . '" />';
     $html .= '<label>片名<input type="text" name="title" maxlength="255" required /></label>';
