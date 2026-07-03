@@ -107,6 +107,8 @@ async function checkPhp() {
   const render = await read('ddys_open/source/render.func.php');
   const shortcode = await read('ddys_open/source/shortcode.func.php');
   const admin = await read('ddys_open/admincp.inc.php');
+  const security = await read('ddys_open/source/security.func.php');
+  const cache = await read('ddys_open/source/cache.func.php');
   const install = await read('ddys_open/install.php');
   for (const text of ['class plugin_ddys_open', 'discuzcode', 'global_header', 'plugin_ddys_open_forum']) {
     if (!klass.includes(text)) failures.push(`ddys_open.class.php missing ${text}`);
@@ -114,8 +116,19 @@ async function checkPhp() {
   for (const text of ['ddys_open_proxy_response', 'ddys_open_allowed_route', 'Invalid route parameters', 'ddys_open_handle_request_form', 'Authorization: Bearer']) {
     if (!client.includes(text)) failures.push(`client.func.php missing ${text}`);
   }
+  for (const text of ['ddys_open_stream_status_code', 'status >= 400', 'ignore_errors']) {
+    if (!client.includes(text)) failures.push(`client.func.php missing HTTP error handling marker ${text}`);
+  }
   for (const text of ['ddys_open_render_list', 'ddys_open_render_detail', 'ddys_open_render_sources', 'ddys_open_render_calendar', 'ddys_open_render_request_form']) {
     if (!render.includes(text)) failures.push(`render.func.php missing ${text}`);
+  }
+  if (render.includes("$printed || empty($settings['enable_styles'])")) failures.push('frontend JS must not be disabled by enable_styles.');
+  if (!render.includes('static/js/frontend.js')) failures.push('frontend JS asset missing.');
+  for (const text of ['http_response_code', 'JSON_UNESCAPED_UNICODE']) {
+    if (!security.includes(text)) failures.push(`security.func.php missing JSON response marker ${text}`);
+  }
+  for (const text of ['ddys_open_cache_prune', 'ddys_open_rate_prune']) {
+    if (!cache.includes(text)) failures.push(`cache.func.php missing cleanup marker ${text}`);
   }
   for (const shortcodeName of shortcodes) {
     if (!shortcode.includes(`'${shortcodeName}'`)) failures.push(`Missing shortcode ${shortcodeName}`);

@@ -72,12 +72,23 @@ test('server-side proxy and request form are guarded', async () => {
   const client = await read('ddys_open/source/client.func.php');
   const request = await read('ddys_open/request.inc.php');
   const security = await read('ddys_open/source/security.func.php');
+  const render = await read('ddys_open/source/render.func.php');
+  const cache = await read('ddys_open/source/cache.func.php');
   assert.match(client, /ddys_open_allowed_route/);
   assert.match(client, /Invalid route parameters/);
   assert.match(client, /ddys_open_handle_request_form/);
   assert.match(client, /Authorization: Bearer/);
+  assert.match(client, /ddys_open_stream_status_code/);
+  assert.match(client, /status >= 400/);
+  assert.match(client, /ignore_errors/);
   assert.match(request, /ddys_open_check_formhash/);
+  assert.match(security, /http_response_code/);
+  assert.match(security, /JSON_UNESCAPED_UNICODE/);
   assert.doesNotMatch(security, /submitcheck\('ddys_submit'\)/);
+  assert.doesNotMatch(render, /\$printed \|\| empty\(\$settings\['enable_styles'\]\)/);
+  assert.match(render, /static\/js\/frontend\.js/);
+  assert.match(cache, /ddys_open_cache_prune/);
+  assert.match(cache, /ddys_open_rate_prune/);
 });
 
 test('install script creates cache and rate-limit tables', async () => {

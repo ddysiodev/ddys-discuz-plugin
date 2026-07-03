@@ -27,12 +27,20 @@ function ddys_open_cache_set($key, $value, $ttl)
     if (!class_exists('DB') || $ttl <= 0) {
         return;
     }
+    ddys_open_cache_prune();
     DB::insert('ddys_open_cache', array(
         'cache_key' => $key,
         'cache_value' => serialize($value),
         'expire_at' => TIMESTAMP + (int)$ttl,
         'updated_at' => TIMESTAMP,
     ), false, true);
+}
+
+function ddys_open_cache_prune()
+{
+    if (class_exists('DB')) {
+        DB::query("DELETE FROM " . DB::table('ddys_open_cache') . " WHERE expire_at<=" . intval(TIMESTAMP));
+    }
 }
 
 function ddys_open_cache_flush()
@@ -58,6 +66,7 @@ function ddys_open_check_rate_limit($scope, $key, $interval)
     if (!class_exists('DB') || $interval <= 0) {
         return true;
     }
+    ddys_open_rate_prune($interval);
     $rateKey = md5($scope . '|' . $key);
     $row = DB::fetch_first("SELECT touched_at FROM " . DB::table('ddys_open_rate') . " WHERE rate_key='" . daddslashes($rateKey) . "'");
     if ($row && (int)$row['touched_at'] > 0 && TIMESTAMP - (int)$row['touched_at'] < $interval) {
@@ -71,3 +80,10 @@ function ddys_open_check_rate_limit($scope, $key, $interval)
     return true;
 }
 
+function ddys_open_rate_prune($interval)
+{
+    if (class_exists('DB')) {
+        $maxAge = max(86400, (int)$interval * 20);
+        DB::query("DELETE FROM " . DB::table('ddys_open_rate') . " WHERE touched_at<" . intval(TIMESTAMP - $maxAge));
+    }
+}

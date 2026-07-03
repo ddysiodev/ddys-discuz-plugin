@@ -301,13 +301,17 @@ function ddys_open_frontend_assets()
 {
     static $printed = false;
     $settings = ddys_open_settings();
-    if ($printed || empty($settings['enable_styles'])) {
+    if ($printed) {
         return '';
     }
     $printed = true;
     $base = ddys_open_plugin_url();
-    return '<link rel="stylesheet" type="text/css" href="' . ddys_open_attr($base . 'static/css/frontend.css?v=' . DDYS_OPEN_VERSION) . '" />' .
-        '<script defer src="' . ddys_open_attr($base . 'static/js/frontend.js?v=' . DDYS_OPEN_VERSION) . '"></script>';
+    $assets = '';
+    if (!empty($settings['enable_styles'])) {
+        $assets .= '<link rel="stylesheet" type="text/css" href="' . ddys_open_attr($base . 'static/css/frontend.css?v=' . DDYS_OPEN_VERSION) . '" />';
+    }
+    $assets .= '<script defer src="' . ddys_open_attr($base . 'static/js/frontend.js?v=' . DDYS_OPEN_VERSION) . '"></script>';
+    return $assets;
 }
 
 function ddys_open_render_page($view, $params)

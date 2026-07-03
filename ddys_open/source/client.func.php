@@ -84,6 +84,9 @@ function ddys_open_http_request($method, $url, $body, $headers, $timeout)
         if ($raw === false) {
             return ddys_open_error('低端影视 API 网络请求失败：' . $err, $status);
         }
+        if ($status >= 400) {
+            return ddys_open_error('低端影视 API HTTP ' . $status . '。', $status, array('raw' => $raw));
+        }
         return $raw;
     }
 
@@ -92,6 +95,7 @@ function ddys_open_http_request($method, $url, $body, $headers, $timeout)
             'method' => $method,
             'timeout' => (int)$timeout,
             'header' => implode("\r\n", $headers),
+            'ignore_errors' => true,
         ),
     );
     if ($body !== null) {
@@ -102,7 +106,19 @@ function ddys_open_http_request($method, $url, $body, $headers, $timeout)
     if ($raw === false) {
         return ddys_open_error('当前 PHP 环境无法请求低端影视 API。', 0);
     }
+    $status = ddys_open_stream_status_code(isset($http_response_header) ? $http_response_header : array());
+    if ($status >= 400) {
+        return ddys_open_error('低端影视 API HTTP ' . $status . '。', $status, array('raw' => $raw));
+    }
     return $raw;
+}
+
+function ddys_open_stream_status_code($headers)
+{
+    if (!is_array($headers) || empty($headers[0])) {
+        return 0;
+    }
+    return preg_match('#\s([0-9]{3})\s#', $headers[0], $matches) ? (int)$matches[1] : 0;
 }
 
 function ddys_open_success_response($json)

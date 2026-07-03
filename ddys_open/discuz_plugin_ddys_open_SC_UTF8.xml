@@ -11,7 +11,7 @@
       <item id="datatables"><![CDATA[ddys_open_cache,ddys_open_rate]]></item>
       <item id="directory"><![CDATA[ddys_open/]]></item>
       <item id="copyright"><![CDATA[DDYS]]></item>
-      <item id="version"><![CDATA[0.1.1]]></item>
+      <item id="version"><![CDATA[0.1.2]]></item>
       <item id="__modules">
         <item id="0">
           <item id="name"><![CDATA[index]]></item>

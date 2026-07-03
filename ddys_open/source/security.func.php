@@ -5,7 +5,7 @@ if (!defined('IN_DISCUZ')) {
 }
 
 define('DDYS_OPEN_ID', 'ddys_open');
-define('DDYS_OPEN_VERSION', '0.1.1');
+define('DDYS_OPEN_VERSION', '0.1.2');
 define('DDYS_OPEN_API_DEFAULT', 'https://ddys.io/api/v1');
 define('DDYS_OPEN_SITE_DEFAULT', 'https://ddys.io');
 
@@ -255,14 +255,20 @@ function ddys_open_check_formhash()
 
 function ddys_open_json_response($payload, $status = 200)
 {
+    if ($status === 200 && ddys_open_is_error($payload) && !empty($payload['status'])) {
+        $status = ddys_open_int_range($payload['status'], 500, 400, 599);
+    }
     if (!headers_sent()) {
+        if (function_exists('http_response_code')) {
+            http_response_code($status);
+        }
         if (function_exists('dheader')) {
             dheader('Content-Type: application/json; charset=utf-8');
         } else {
             header('Content-Type: application/json; charset=utf-8', true, $status);
         }
     }
-    echo json_encode($payload);
+    echo json_encode($payload, defined('JSON_UNESCAPED_UNICODE') ? JSON_UNESCAPED_UNICODE : 0);
     exit;
 }
 
